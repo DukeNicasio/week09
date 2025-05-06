@@ -7,45 +7,16 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Install Node.js and npm') {
+        stage('Build Docker Image') {
             steps {
-                echo "Installing Node.js and npm..."
-                sh '''
-                curl -sL https://deb.nodesource.com/setup_20.x | bash -
-                apt-get install -y nodejs
-                '''
+                echo "Building Docker image..."
+                sh 'docker build -t my-app .'
             }
         }
-        stage('Install Dependencies') {
+        stage('Run Docker Container') {
             steps {
-                echo "Installing dependencies..."
-                dir('my-app') {
-                    sh 'npm install'
-                }
-            }
-        }
-        stage('Build') {
-            steps {
-                echo "Building project..."
-                dir('my-app') {
-                    sh 'npm run build'
-                }
-            }
-        }
-        stage('Test') {
-            steps {
-                echo "Running tests..."
-                dir('my-app') {
-                    sh 'npm test'
-                }
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo "Deploying..."
-                dir('my-app') {
-                    sh 'firebase deploy --only hosting'
-                }
+                echo "Running Docker container..."
+                sh 'docker run -d -p 3000:3000 my-app'
             }
         }
     }
