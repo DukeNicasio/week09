@@ -7,9 +7,18 @@ pipeline {
                 checkout scm
             }
         }
+        stage('Install Node.js and npm') {
+            steps {
+                echo "Installing Node.js and npm..."
+                sh '''
+                curl -sL https://deb.nodesource.com/setup_16.x | bash -
+                sudo apt-get install -y nodejs
+                '''
+            }
+        }
         stage('Install Dependencies') {
             steps {
-                echo "Installing dependencies in my-app directory..."
+                echo "Installing dependencies..."
                 dir('my-app') {
                     sh 'npm install'
                 }
@@ -19,7 +28,7 @@ pipeline {
             steps {
                 echo "Building project..."
                 dir('my-app') {
-                    sh 'npm run build'  // ถ้าคุณมีคำสั่ง build ใน my-app
+                    sh 'npm run build'
                 }
             }
         }
@@ -27,7 +36,7 @@ pipeline {
             steps {
                 echo "Running tests..."
                 dir('my-app') {
-                    sh 'npm test'  // ถ้าคุณมีคำสั่ง test ใน my-app
+                    sh 'npm test'
                 }
             }
         }
@@ -35,7 +44,6 @@ pipeline {
             steps {
                 echo "Deploying..."
                 dir('my-app') {
-                    // ตัวอย่างคำสั่ง deploy ไป Firebase Hosting
                     sh 'firebase deploy --only hosting'
                 }
             }
