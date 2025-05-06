@@ -1,5 +1,12 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:20' // ใช้ node ที่รองรับ build ได้เลย
+        }
+    }
+    environment {
+        FIREBASE_TOKEN = credentials('firebase_token') // ใช้ Jenkins Credential ชื่อ firebase_token
+    }
     stages {
         stage('Clone') {
             steps {
@@ -7,16 +14,42 @@ pipeline {
                 checkout scm
             }
         }
-        stage('Build Docker Image') {
+        stage('Install Firebase CLI') {
             steps {
-                echo "Building Docker image..."
-                sh 'docker build -t my-app .'
+                echo "Installing Firebase CLI..."
+                sh 'npm install -g firebase-tools'
             }
         }
-        stage('Run Docker Container') {
+        stage('Install Dependencies') {
             steps {
-                echo "Running Docker container..."
-                sh 'docker run -d -p 3000:3000 my-app'
+                echo "Installing dependencies..."
+                dir('my-app') {
+                    sh 'npm install'
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                echo "Building project..."
+                dir('my-app') {
+                    sh 'npm run build'
+                }
+            }
+        }
+        stage('Test') {
+            steps {
+                echo "Running tests..."
+                dir('my-app') {
+                    sh 'npm test'
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo "Deploying to Firebase Hosting..."
+                dir('my-app') {
+                    sh 'firebase deploy --only hosting --token "$FIREBASE_TOKEN"'
+                }
             }
         }
     }
