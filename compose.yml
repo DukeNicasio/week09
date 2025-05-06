@@ -8,7 +8,6 @@ services:
     volumes:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./my-app:/var/jenkins_home/workspace/my-app  # ✅ เพิ่มบรรทัดนี้
     restart: unless-stopped
 
 volumes:
